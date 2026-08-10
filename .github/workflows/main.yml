@@ -15,6 +15,7 @@ jobs:
 
     permissions:
       contents: write
+      actions: write
 
     steps:
       - name: Checkout
@@ -35,18 +36,18 @@ jobs:
 
       - name: Wait before next run
         if: success()
-        run: sleep 598
+        run: sleep 599
 
       - name: Trigger next run
-        shell: bash
         if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           sleep 30
 
-          curl -X POST \
+          curl --fail-with-body -X POST \
             -H "Authorization: Bearer ${GITHUB_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows/main.yml/dispatches \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/main.yml/dispatches" \
             -d '{"ref":"main"}'
